@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <title>Speech-to-Image WebApp</title>
+  <!-- Shared CSS for Speech-to-Text -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900" rel="stylesheet">
+  <link rel="stylesheet" href="speech_to_text/css/variables.css">
+  <link rel="stylesheet" href="speech_to_text/css/main.css">
+  <style>
+    /* Optional styling to visually separate sections */
+    .section {
+      margin: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    #generated-img {
+      display: block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Speech-to-Text Section -->
+  <section class="section" id="speech-section">
+    <main class="center">
+      <div id="transcript-history"></div>
+      <p id="msg-get-started">Press the microphone button to get started</p>
+      <div id="transcription-box-and-btn-microphone">
+        <div id="transcript-box" hidden></div>
+        <button id="btn-microphone" class="dark center">
+          <img src="speech_to_text/assets/icons/microphone-light.svg" alt="Microphone">
+        </button>
+      </div>
+    </main>
+  </section>
+
+  <!-- Image Generation Section -->
+  <section class="section" id="image-section">
+    <h2>Generate AI Image</h2>
+    <input id="generate-img-prompt" placeholder="Your image prompt will appear here">
+    <button id="btn-generate-img">Generate image</button>
+    <span id="generate-img-status"></span>
+    <br>
+    <img src="" alt="AI-generated image" id="generated-img" style="width:500px;height:500px;">
+  </section>
+
+  <!-- Speech-to-Text Scripts -->
+  <script src="speech_to_text/js/helper_functions.mjs" type="module"></script>
+  <script src="speech_to_text/js/speech_recognition.mjs" type="module"></script>
+  <script src="speech_to_text/js/init.mjs" type="module"></script>
+
+  <!-- Image Generation Scripts -->
+  <script src="image_generation/image_generation.js"></script>
+  <script defer src="image_generation/init.js"></script>
+
+  <!-- Integration Script: Copy transcript to image prompt -->
+  <script type="module">
+    import {$} from "speech_to_text/js/helper_functions.mjs";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const transcriptHistory = $('#transcript-history');
+      const imgPrompt = $('#generate-img-prompt');
+
+      // Observer: When a new transcript entry is added, update the image prompt.
+      const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            // Grab the last transcript entry
+            const lastTranscript = transcriptHistory.lastElementChild;
+            if (lastTranscript && lastTranscript.innerText.trim()) {
+              imgPrompt.value = lastTranscript.innerText.trim();
+            }
+          }
+        }
+      });
+      observer.observe(transcriptHistory, { childList: true });
+    });
+  </script>
+</body>
+</html>
